@@ -99,9 +99,21 @@ export default function HomePage() {
 
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-      await axios.post(`${API_BASE_URL}/game/join`, {})
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        setError('No authentication token found')
+        return
+      }
+      
+      console.log('HOME: Attempting to join session...')
+      await axios.post(`${API_BASE_URL}/game/join`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      console.log('HOME: Successfully joined session, navigating to game...')
       router.push('/game')
     } catch (err: any) {
+      console.error('HOME: Join session error:', err)
       setError(err.response?.data?.message || 'Failed to join session')
     } finally {
       setLoading(false)
